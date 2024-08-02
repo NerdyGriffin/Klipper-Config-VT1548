@@ -1,0 +1,5 @@
+*.bkp
+backup/*
+klipper.uf2
+moonraker-obico.cfg
+moonraker.conf

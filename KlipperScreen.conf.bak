@@ -1,0 +1,71 @@
+[printer Printer]
+titlebar_items: chamber_temp
+z_babystep_values: 0.005, 0.01
+
+[printer V0.3048]
+titlebar_items: chamber_temp
+z_babystep_values: 0.005, 0.01
+
+#~# --- Do not edit below this line. This section is auto generated --- #~#
+#~#
+#~# [main]
+#~# screen_blanking = off
+#~# confirm_estop = True
+#~# show_heater_power = True
+#~# show_scroll_steppers = True
+#~# move_speed_z = 15
+#~# print_sort_dir = date_asc
+#~# 
+#~# [displayed_macros Printer]
+#~# get_timelapse_setup = False
+#~# hyperlapse = False
+#~# m0 = False
+#~# m226 = False
+#~# m300 = False
+#~# preheat_timer = False
+#~# print_end = False
+#~# print_start = False
+#~# set_logo_leds_off = False
+#~# set_nozzle_leds_off = False
+#~# set_nozzle_leds_on = False
+#~# status_busy = False
+#~# status_calibrating_z = False
+#~# status_cleaning = False
+#~# status_heating = False
+#~# status_homing = False
+#~# status_leveling = False
+#~# status_meshing = False
+#~# status_off = False
+#~# status_party = False
+#~# status_printing = False
+#~# status_ready = False
+#~# t0 = False
+#~# test_stream_delay = False
+#~# timelapse_render = False
+#~# timelapse_take_frame = False
+#~# 
+#~# [displayed_macros V0.3048]
+#~# get_timelapse_setup = False
+#~# hyperlapse = False
+#~# m0 = False
+#~# m226 = False
+#~# m300 = False
+#~# preheat_timer = False
+#~# print_end = False
+#~# print_start = False
+#~# status_busy = False
+#~# status_calibrating_z = False
+#~# status_cleaning = False
+#~# status_heating = False
+#~# status_homing = False
+#~# status_leveling = False
+#~# status_meshing = False
+#~# status_off = False
+#~# status_party = False
+#~# status_printing = False
+#~# status_ready = False
+#~# t0 = False
+#~# test_stream_delay = False
+#~# timelapse_render = False
+#~# timelapse_take_frame = False
+#~#
