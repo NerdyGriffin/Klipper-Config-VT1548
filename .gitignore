@@ -1,5 +1,6 @@
-*.bkp
 backup/*
+*.bkp
 klipper.uf2
-moonraker-obico.cfg
 moonraker.conf
+moonraker-obico.cfg
+printer-20*_*.cfg
