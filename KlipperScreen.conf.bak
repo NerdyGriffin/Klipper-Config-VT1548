@@ -15,14 +15,14 @@ z_babystep_values: 0.005, 0.01
 #~# show_scroll_steppers = True
 #~# move_speed_z = 15
 #~# print_sort_dir = date_asc
-#~# 
+#~#
 #~# [displayed_macros Printer]
 #~# get_timelapse_setup = False
 #~# hyperlapse = False
 #~# m0 = False
 #~# m226 = False
 #~# m300 = False
-#~# preheat_timer = False
+#~# heat_soak = False
 #~# print_end = False
 #~# print_start = False
 #~# set_logo_leds_off = False
@@ -43,14 +43,14 @@ z_babystep_values: 0.005, 0.01
 #~# test_stream_delay = False
 #~# timelapse_render = False
 #~# timelapse_take_frame = False
-#~# 
+#~#
 #~# [displayed_macros V0.3048]
 #~# get_timelapse_setup = False
 #~# hyperlapse = False
 #~# m0 = False
 #~# m226 = False
 #~# m300 = False
-#~# preheat_timer = False
+#~# heat_soak = False
 #~# print_end = False
 #~# print_start = False
 #~# status_busy = False
