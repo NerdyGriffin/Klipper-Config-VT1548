@@ -1,0 +1,16 @@
+{
+    "system": {
+        "current_load": null,
+        "num_units": 0,
+        "num_lanes": 0,
+        "num_extruders": 1,
+        "extruders": {
+            "extruder": {
+                "lane_loaded": null
+            }
+        },
+        "bypass": {
+            "enabled": false
+        }
+    }
+}
