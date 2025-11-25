@@ -7,5 +7,7 @@
 			"path": "/home/pi/github/NerdyGriffin/Klipper-Config-V03048"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"terminal.integrated.cwd": "/home/pi/printer_data/config"
+	}
 }
