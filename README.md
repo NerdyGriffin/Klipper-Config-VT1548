@@ -2,6 +2,7 @@
 This is the contents of the /home/pi/printer_data/config/ directory
 
 ```
+$ tree
 .
 ├── AFC
 │   ├── AFC.cfg
