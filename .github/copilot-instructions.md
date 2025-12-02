@@ -2,6 +2,13 @@
 
 This is a **Klipper 3D printer configuration** for a Voron Trident 300mm (VT.1548) with advanced multi-material capabilities via AFC (Automated Filament Control from https://github.com/ArmoredTurtle/AFC-Klipper-Add-On).
 
+## NFS Mount Context
+
+⚠️ **When accessed via V0-3048 Remote-SSH session:**
+- This config is NFS-mounted at `/home/pi/printers/vt-1548/printer_data/config` (writable)
+- The VT-1548 macros at `/home/pi/printers/vt-1548/klipper-nerdygriffin-macros` are READ-ONLY (for reference)
+- To edit macros, use `/home/pi/printers/v0-3048/klipper-nerdygriffin-macros` and sync with `dev/sync_macros_repo.sh`
+
 ## Architecture Overview
 
 ### Config Organization Pattern
