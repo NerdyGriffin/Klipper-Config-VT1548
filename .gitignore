@@ -1,8 +1,31 @@
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*_backup_*
 *.bkp
-AFC/AFC.var.unit
-ShakeTune_results/*
 backup/*
+printer-20*_*.cfg
+
+# Build files
 klipper.uf2
+
+# Config files with secrets/auto-generated content
 moonraker-obico.cfg
 moonraker.conf*
-printer-20*_*.cfg
+
+# AFC runtime state
+AFC/AFC.var.unit
+
+# Test results
+ShakeTune_results/*
