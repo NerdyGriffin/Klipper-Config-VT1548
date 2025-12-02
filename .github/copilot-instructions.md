@@ -1,6 +1,6 @@
-# AI Agent Instructions for Klipper-Config-VT1548
+# AI Agent Instructions for Klipper-Config-VT-1548
 
-This is a **Klipper 3D printer configuration** for a Voron Trident 300mm (VT.1548) with advanced multi-material capabilities via AFC (Armored Filament Changer).
+This is a **Klipper 3D printer configuration** for a Voron Trident 300mm (VT.1548) with advanced multi-material capabilities via AFC (Automated Filament Control from https://github.com/ArmoredTurtle/AFC-Klipper-Add-On).
 
 ## Architecture Overview
 
@@ -85,11 +85,13 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 
 ## Hardware-Specific Details
 
+- Serial Number: VT.1548
+- Hostname: VT-1548
+
 ### BTT Octopus V1 (Main MCU)
 - **Stepper drivers**: TMC2209 UART mode
 - **Sensorless homing**: XY use stallguard (`SGTHRS` tuned via TMC autotune)
 - **Z steppers**: 3x steppers for z-tilt (TR8x4 leadscrews, `rotation_distance: 4`)
-- **Bed heater**: ~~Max 1.6 power to prevent SSR overload (Omron G3NA-210B-DC5 rated 4A)~~
 - **Fan issue**: FAN3 (PD13) burned out 2023-10-27; exhaust moved to FAN0 (PA8)
 
 ### LDO Nitehawk-36 Toolboard (Extruder MCU)
@@ -158,7 +160,7 @@ managed_services: klipper
 - **Build volume**: 300x310x280mm (X: 0-300, Y: 0-310, Z: -2.5 to 280)
 - **Parking positions**:
   - AFC_PARK: Near rear-left for tool changes
-  - Standard park: X=150 (center), Y=308 (rear-2mm) (this line may be incorrect)
+  - Standard park: Dynamic — `X=axis_max/2`, `Y=axis_max-2` (computed at runtime in `PRINT_END`)
 - **Beacon offset**: X=0, Y=25 (probe 25mm behind nozzle)
 
 ### Temperature Limits
