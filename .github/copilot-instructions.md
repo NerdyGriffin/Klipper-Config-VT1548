@@ -132,6 +132,15 @@ tail -f ~/printer_data/logs/klippy.log
 curl -s -X POST "http://localhost:7125/printer/gcode/script?script=MY_MACRO"
 ```
 
+### Terminal Command Best Practices
+- **Always use verbose flags** (`-v` or `--verbose`) with file operations for visual confirmation:
+  - `cp -v` instead of `cp`
+  - `mv -v` instead of `mv`
+  - `rm -v` instead of `rm`
+  - `rmdir -v` instead of `rmdir`
+  - `ln -sfv` instead of `ln -sf`
+- This provides immediate feedback and helps catch errors early.
+
 ### Tuning Operations (in order)
 1. **Sensorless homing**: `TEST_SENSORLESS_HOME_X TEST_SGTHRS=255` (decrease until reliable)
 2. **PID tuning**: `AUTO_PID_CALIBRATE HEATER=extruder TARGET=260`
