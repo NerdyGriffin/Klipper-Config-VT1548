@@ -103,7 +103,7 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 ### LDO Nitehawk-36 Toolboard (Extruder MCU)
 - **RP2040-based** CAN toolboard, connected via USB serial
 - **BMG-style extruder**: 44:8, 25:17 gear ratio, `rotation_distance: 35.2` (calibrate per printer)
-- **Pressure advance**: Currently tuned to `0.07` (date: 2025-09-22)
+- **Pressure advance**: See the authoritative value in `printer.cfg` (`[extruder]` section). Avoid duplicating values in docs.
 - **Toolhead sensors**: Start sensor (`gpio3`), end sensor (`gpio13`) for AFC
 - **Hotend fan**: Has tachometer feedback (`tachometer_pin: nhk:gpio16`)
 
@@ -145,7 +145,7 @@ curl -s -X POST "http://localhost:7125/printer/gcode/script?script=MY_MACRO"
 1. **Sensorless homing**: `TEST_SENSORLESS_HOME_X TEST_SGTHRS=255` (decrease until reliable)
 2. **PID tuning**: `AUTO_PID_CALIBRATE HEATER=extruder TARGET=260`
 3. **Input shaper**: `TEST_RESONANCES AXIS=X`, analyze with `scripts/graph_accelerometer.py`
-4. **Pressure advance**: `TUNING_TOWER COMMAND=SET_PRESSURE_ADVANCE PARAMETER=ADVANCE START=0 FACTOR=.005`
+4. **Pressure advance**: `TUNING_TOWER COMMAND=SET_PRESSURE_ADVANCE PARAMETER=ADVANCE START=0 FACTOR=.005` (check `printer.cfg` after tuning for the latest value)
 5. **Beacon calibration**: `BEACON_CALIBRATE` (automatic on first home with `home_autocalibrate: unhomed`)
 
 ### Moonraker Update Management
