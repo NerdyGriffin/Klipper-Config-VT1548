@@ -24,7 +24,7 @@ This repository contains the Klipper configuration for a Voron Trident 300mm (VT
 - Symlinked directories (`AFC_menu.conf`, `KAMP`, `nerdygriffin-macros`) contain files not tracked in this repo. Override behavior in local config; do not edit symlinked content.
 - AFC configuration lives under `AFC/` and is printer-specific.
 
-This is the contents of the /home/pi/printer_data/config/ directory
+This is the contents of the /home/pi/printer_data/config/ directory [NOTE: this line may be redundant. consider removing it]
 
 ```
 $ tree
