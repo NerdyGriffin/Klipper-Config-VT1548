@@ -22,8 +22,3 @@ This repository contains the Klipper configuration for a Voron Trident 300mm (VT
 - [KlipperScreen](https://github.com/KlipperScreen/KlipperScreen)
 - [moonraker-obico](https://github.com/TheSpaghettiDetective/moonraker-obico)
 - [timelapse](https://github.com/mainsail-crew/moonraker-timelapse)
-
-## Notes
-- Symlinked directories (`AFC_menu.conf`, `KAMP`, `nerdygriffin-macros`) contain files not tracked in this repo
-- `AFC/` directory is local and printer-specific (multi-material configuration)
-- Override behavior in local config; do not edit symlinked content
