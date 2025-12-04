@@ -5,20 +5,8 @@ This repository contains the Klipper configuration for a Voron Trident 300mm (VT
 ## Architecture Overview
 - Main entry: `printer.cfg` includes subsystems and plugins.
 - Symlinked plugins: `nerdygriffin-macros/` (shared macros), `KAMP/` (Adaptive Purge/Smart Park), `AFC_menu.conf` (KlipperScreen menu). Do not modify symlinked content; override locally.
-- Hardware-specific: `beacon.cfg` (probe), `nitehawk-36.cfg` (extruder, sensors), `status-macros.cfg`.
+- Hardware-specific: `nitehawk-36.cfg` (toolhead), `beacon.cfg` (probe).
 - Local multi-material: `AFC/` contains the AFC hub configuration and macros.
-
-## Workflows
-- Restart + tail logs after config edits:
-	```bash
-	sudo systemctl restart klipper
-	tail -f ~/printer_data/logs/klippy.log
-	```
-- Test macros quickly:
-	```bash
-	curl -s -X POST "http://localhost:7125/printer/gcode/script?script=AFC_PARK"
-	curl -s -X POST "http://localhost:7125/printer/gcode/script?script=HEAT_SOAK%20CHAMBER=50%20DURATION=10"
-	```
 
 ## Notes
 - Symlinked directories (`AFC_menu.conf`, `KAMP`, `nerdygriffin-macros`) contain files not tracked in this repo. Override behavior in local config; do not edit symlinked content.
@@ -27,8 +15,6 @@ This repository contains the Klipper configuration for a Voron Trident 300mm (VT
 This is the contents of the /home/pi/printer_data/config/ directory [NOTE: this line may be redundant. consider removing it]
 
 ```
-$ tree
-.
 ├── .github
 │   └── [copilot instructions & prompts]
 ├── AFC
@@ -50,8 +36,8 @@ $ tree
 ├── print_macros.cfg
 ├── status-macros.cfg
 └── TEST_SPEED.cfg
+```
 
 Note: Symlinked directories (AFC_menu.conf, KAMP, nerdygriffin-macros) contain files not tracked in this repo.
-AFC directory contains local multi-material configuration.
+AFC directory is created by the AFC installer and contains local multi-material configuration.
 See git history for complete file listing.
-```
