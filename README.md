@@ -25,6 +25,20 @@ This repository contains the Klipper configuration for a Voron Trident 300mm (VT
 
 ---
 
+## Hardware Mods
+
+### Adjustable Gantry-Mounted Nozzle Seal & Brush
+- [Printables Model](https://www.printables.com/model/882364-new-version-adjustable-gantry-mounted-nozzle-seal) by Ioannis Giannakas
+- **Purpose**: Gantry-mounted nozzle parking spot with silicone brush for multi-material systems (AFC/ERCF)
+- **Key Features**:
+  - Spring-loaded silicone parking pad prevents ooze during tool changes (withstands up to 287°C)
+  - Bambu Lab silicone wiper for gentle, non-conductive nozzle cleaning
+  - Adjustable mounting for various toolhead configurations
+  - No Z-axis movement required for wiping (gantry-mounted advantage)
+- **Integration**: Used with `AFC_PARK` and `AFC_BRUSH` macros in `print_macros.cfg`
+
+---
+
 ## Credits
 
 - [LDO Nitehawk-36 Toolboard](https://github.com/MotorDynamicsLab/Nitehawk-36) - RP2040-based USB toolboard with integrated TMC2209, accelerometer, and tachometer-enabled fans
