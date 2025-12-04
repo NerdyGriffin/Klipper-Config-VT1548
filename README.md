@@ -22,3 +22,9 @@ This repository contains the Klipper configuration for a Voron Trident 300mm (VT
 - [KlipperScreen](https://github.com/KlipperScreen/KlipperScreen)
 - [moonraker-obico](https://github.com/TheSpaghettiDetective/moonraker-obico)
 - [timelapse](https://github.com/mainsail-crew/moonraker-timelapse)
+
+---
+
+## Credits
+
+- [LDO Nitehawk-36 Toolboard](https://github.com/MotorDynamicsLab/Nitehawk-36) - RP2040-based USB toolboard with integrated TMC2209, accelerometer, and tachometer-enabled fans

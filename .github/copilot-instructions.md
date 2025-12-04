@@ -201,6 +201,12 @@ managed_services: klipper
 - Check AFC calibration: `tool_stn` (27.23mm) and `tool_stn_unload` (96.8mm) in `AFC_Hardware.cfg`
 - Review AFC LED states on hub to diagnose (defined in `AFC/AFC.cfg` led_* variables)
 
+## Deprecated Files
+
+- Files in `deprecated/` are archived configs kept for reference only.
+- Do not document or suggest using deprecated files.
+- These files are tracked for historical reference, but they are not actively maintained.
+
 ## Version Control Notes
 
 - **Active branch**: `main` (Owner: NerdyGriffin, Repo: Klipper-Config-VT1548)
