@@ -50,6 +50,7 @@
       "**/*.var": true,
       "**/backup/**": true,
       "**/deprecated/**": true,
+      "**/nerdygriffin_macros/**": true,
       "**/ShakeTune_results/**": true
     }
   }
