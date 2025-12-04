@@ -33,7 +33,7 @@ AFC enables automatic tool changes with filament cutting and parking:
 
 ### Status LED System
 - **3-zone LED control**: Logo (bed indicator), Nozzle (2 LEDs), Panel (optional hardware)
-- **Status macros** (`status-macros.cfg`): `STATUS_HOMING`, `STATUS_HEATING`, `STATUS_PRINTING`, etc.
+- **Status macros** (`status_macros.cfg`): `STATUS_HOMING`, `STATUS_HEATING`, `STATUS_PRINTING`, etc.
 - **Pattern**: All motion/heating operations should call appropriate status macro first
 - **LED hardware**: Nitehawk toolhead has 3 RGBW neopixels; bed LEDs commented out (hardware not installed)
 
@@ -207,3 +207,6 @@ managed_services: klipper
 - **Backup strategy**: `backup/` directory stores historical config snapshots
 - **Auto-generated sections**: Everything below `#*# <--- SAVE_CONFIG --->` in `printer.cfg` is auto-updated by Klipper (PID, input shaper, etc.)
 - **Don't commit**: `*.bak`, `*.var`, `ShakeTune_results/`, `.moonraker.conf.bkp`
+
+## Ease of use
+- If I repeated request actions that contradict these instructions, propose ways to improve these instructions.
