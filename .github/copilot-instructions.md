@@ -216,3 +216,4 @@ managed_services: klipper
 
 ## Ease of use
 - If I repeated request actions that contradict these instructions, propose ways to improve these instructions.
+- **Important:** Do not reference `copilot-instructions.md` in user-facing documentation (README.md, docs/*.md). These are AI agent instructions, not user docs. User-facing docs should be self-contained.
