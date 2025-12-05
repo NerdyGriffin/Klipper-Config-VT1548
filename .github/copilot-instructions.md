@@ -123,7 +123,7 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 ### Testing Macro Changes
 ```bash
 # Restart Klipper after config edits
-sudo systemctl restart klipper
+curl -s -X POST "http://localhost:7125/printer/gcode/script?script=FIRMWARE_RESTART"
 
 # Check for errors
 tail -f ~/printer_data/logs/klippy.log
