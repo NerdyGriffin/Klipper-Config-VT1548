@@ -29,3 +29,6 @@ AFC/AFC.var.unit
 
 # Test results
 ShakeTune_results/*
+
+# Custom plugin symlink
+nerdygriffin-macros/*
