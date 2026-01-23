@@ -37,6 +37,7 @@
     "files.associations": {
       "*.cfg": "klipper-config"
     },
+    "files.eol": "\n",
     "files.watcherExclude": {
       "**/.git/**": true,
       "**/*.bak": true,
@@ -52,7 +53,6 @@
       "**/deprecated/**": true,
       "**/nerdygriffin_macros/**": true,
       "**/ShakeTune_results/**": true
-    },
-    "files.eol": "\n"
+    }
   }
 }
