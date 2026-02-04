@@ -43,7 +43,7 @@ AFC enables automatic tool changes with filament cutting and parking:
   - Proximity mode: Faster subsequent homing after initial contact calibration
 - **Sensorless XY homing** (`homing.cfg`): TMC stallguard-based with reduced motor current during homing
 - **Z-tilt leveling**: 3-point bed leveling (front-left, rear-center, front-right) before every mesh
-- **Thermal compensation**: `thermal_z_offset: 0.070` added during print, removed after (`_BEACON_VARIABLE`)
+- **Thermal compensation**: See `_BEACON_VARIABLE` macro and `beacon.cfg` for authoritative thermal Z offset values (added during print, removed after)
 
 ## Critical Patterns & Conventions
 
@@ -102,7 +102,7 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 
 ### LDO Nitehawk-36 Toolboard (Extruder MCU)
 - **RP2040-based** CAN toolboard, connected via USB serial
-- **BMG-style extruder**: 44:8, 25:17 gear ratio, `rotation_distance: 35.2` (calibrate per printer)
+- **BMG-style extruder**: 44:8, 25:17 gear ratio (see `nitehawk-36.cfg` for current `rotation_distance`)
 - **Pressure advance**: See the authoritative value in `printer.cfg` (`[extruder]` section). Avoid duplicating values in docs.
 - **Toolhead sensors**: Start sensor (`gpio3`), end sensor (`gpio13`) for AFC
 - **Hotend fan**: Has tachometer feedback (`tachometer_pin: nhk:gpio16`)
@@ -168,7 +168,7 @@ managed_services: klipper
 - **Print speeds**: 500 mm/s max velocity, 20000 mm/s² max accel (input shaper tuned)
 - **Z speed**: 50 mm/s max, 300 mm/s² accel (conservative for TR8x4 leadscrews)
 - **Homing speeds**: 80 mm/s (sensorless requires speed > rotation_distance)
-- **AFC long moves**: 150 mm/s, 250 mm/s² (fast filament changes) (consider increasing if reliable)
+- **AFC long moves**: 150 mm/s, 250 mm/s² (fast filament changes)
 - **AFC short moves**: 50 mm/s, 300 mm/s² (precise toolhead loading)
 
 ### Dimensions
@@ -198,7 +198,7 @@ managed_services: klipper
 
 ### AFC tool change failures
 - Verify sensors: `QUERY_FILAMENT_SENSOR SENSOR=encoder_sensor`
-- Check AFC calibration: `tool_stn` (27.23mm) and `tool_stn_unload` (96.8mm) in `AFC_Hardware.cfg`
+- Check AFC calibration: See `AFC/AFC_Hardware.cfg` for authoritative `tool_stn` and `tool_stn_unload` values
 - Review AFC LED states on hub to diagnose (defined in `AFC/AFC.cfg` led_* variables)
 
 ## Deprecated Files
