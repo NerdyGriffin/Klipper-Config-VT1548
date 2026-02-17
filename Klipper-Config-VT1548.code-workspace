@@ -15,6 +15,10 @@
     {
       "name": "V0-3048: config",
       "path": "/mnt/v0-3048/printer_data/config"
+    },
+    {
+      "name": "VT-1548: klippain_shaketune",
+      "path": "/home/pi/klippain_shaketune"
     }
   ],
   "settings": {
