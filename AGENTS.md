@@ -2,11 +2,23 @@
 
 This is a **Klipper 3D printer configuration** for a Voron Trident 300mm (VT.1548) with advanced multi-material capabilities via AFC (Automated Filament Control from https://github.com/ArmoredTurtle/AFC-Klipper-Add-On).
 
-## Remote Access Context
+## Multi-Printer Setup & Shared Macros
 
-⚠️ **When accessed from V0-3048 Remote-SSH:**
-- This config is NFS-mounted at `/mnt/vt-1548/printer_data/config` (writable)
-- To edit macros: work in V0-3048's `/home/pi/klipper-nerdygriffin-macros`, then sync using `dev/sync_macros_repo.sh`
+This printer (VT-1548) and the Voron V0 (V0-3048) are **separate machines with separate config
+repos** (`Klipper-Config-VT1548`, `Klipper-Config-V03048`). They are *not* kept in lockstep — each
+holds its own hardware and overrides. **Feature parity comes from the shared
+`klipper-nerdygriffin-macros` repo**, which both configs include via an identical
+`nerdygriffin-macros/` symlink, so there is nothing to reconcile between the two config repos.
+
+Each host keeps its own clone of `klipper-nerdygriffin-macros`. After changing a shared macro:
+1. Commit and **push** in `klipper-nerdygriffin-macros`.
+2. Pull every host's clone to the same commit — `dev/sync_macros_repo.sh` (run from the V0 host; it
+   pulls the local clone and the VT-1548 clone over SSH alias `vt-1548`).
+3. `FIRMWARE_RESTART` each printer.
+
+When editing from the other host over Remote-SSH/NFS the counterpart config is mounted (this config
+at `/mnt/vt-1548/...`, the V0 config at `/mnt/v0-3048/...`); still edit shared macros in
+`klipper-nerdygriffin-macros`, never in a mounted config's `nerdygriffin-macros/` symlink.
 
 ## Architecture Overview
 
@@ -216,4 +228,7 @@ managed_services: klipper
 
 ## Ease of use
 - If I repeated request actions that contradict these instructions, propose ways to improve these instructions.
-- **Important:** Do not reference `copilot-instructions.md` in user-facing documentation (README.md, docs/*.md). These are AI agent instructions, not user docs. User-facing docs should be self-contained.
+- **Important:** This file (`AGENTS.md`) is the vendor-neutral source of truth for AI-agent guidance —
+  surfaced to Claude Code via `CLAUDE.md` (`@AGENTS.md` import) and to GitHub Copilot via the
+  `.github/copilot-instructions.md` symlink. Edit `AGENTS.md`, not the pointers. Do not reference it
+  from user-facing docs (README.md, docs/*.md); those must be self-contained.
