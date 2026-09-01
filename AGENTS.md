@@ -55,6 +55,11 @@ AFC enables automatic tool changes with filament cutting and parking:
   - Contact mode: Used for initial Z calibration (`_CONTACT_ACTIVATE` cools the extruder to 150°C)
   - Proximity mode: Faster subsequent homing after initial contact calibration
 - **Sensorless XY homing** (`nerdygriffin-macros/homing.cfg`): TMC stallguard-based with reduced motor current during homing
+- **No `[homing_override]` and no local homing file**: `[beacon]` supplies the equivalent
+  (`home_xy_position`, `home_method`, `home_method_when_homed`), and `beacon.cfg` notes the section
+  "should be removed... it is handled by the `[beacon]` section". V0-3048 *does* carry a local
+  `homing_override.cfg` with its own `_HOME_X/Y/Z` because it homes Z to a switch endstop — do not copy
+  that pattern here.
 - **Z-tilt leveling**: 3-point bed leveling (front-left, rear-center, front-right) before every mesh
 - **Thermal compensation**: See `_BEACON_VARIABLE` macro and `beacon.cfg` for authoritative thermal Z offset values (added during print, removed after)
 
