@@ -124,9 +124,14 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 - Hostname: VT-1548
 
 ### BTT Octopus V1 (Main MCU)
-- **Stepper drivers**: TMC2209 UART mode
-- **Sensorless homing**: XY use stallguard (`SGTHRS` tuned via TMC autotune)
-- **Z steppers**: 3x steppers for z-tilt (TR8x4 leadscrews, `rotation_distance: 4`)
+- **Stepper drivers**: TMC2209 UART mode, managed by `klipper_tmc_autotune`. Motor models and stallguard
+  thresholds are declared per-stepper in `autotune.cfg`.
+- **XY motors are non-stock**: `ldo-42sth48-2504ah` (2.5 A) rather than the stock Trident pair, driven at a
+  correspondingly higher `run_current` in `printer.cfg`. The `motor:` entries in `autotune.cfg` must match
+  the physical motors — autotune derives its tuning from that model, so a stale entry silently mistunes the
+  driver rather than erroring.
+- **Sensorless homing**: XY use stallguard; thresholds are `sg4_thrs` per stepper in `autotune.cfg`
+- **Z steppers**: 3x `ldo-42sth40-1684cl350et` for z-tilt (TR8x4 leadscrews, `rotation_distance: 4`)
 - **Fan issue**: FAN3 (PD13) burned out 2023-10-27; exhaust moved to FAN0 (PA8)
 
 ### LDO Nitehawk-36 Toolboard (Extruder MCU)
@@ -144,7 +149,7 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
     literally (`lookup_object('filament_switch_sensor bypass')`) and binds it as its bypass flag,
     which breaks `UNLOAD_FILAMENT` after a runout. See AFC gotchas below.
 - **Motion sensor** (`encoder_sensor`, `^PG13`): BTT SFS v2.0, detects flow issues/clogs
-  - `detection_length: 20` (tuned for reliability; BTT default is 2.88)
+  - `detection_length` is tuned well above the BTT default (2.88) to avoid flow-dropoff false positives; see `printer.cfg`
   - Enabled during print (`PRINT_START`), disabled after (`PRINT_END`)
 - **Toolhead runout** (`nhk:gpio3`, AFC-owned `pin_tool_start`): pauses in manual/bypass mode via
   `enable_runout_in_bypass: True` in `AFC/AFC.cfg`
@@ -205,26 +210,31 @@ managed_services: klipper
 
 ## Key Configuration Values
 
+Every value below is tuned or calibrated and *will* drift. Read the cited config; do not trust numbers
+quoted in documentation. Only nominal hardware specs are stated outright.
+
 ### Speeds & Accelerations
-- **Print speeds**: 500 mm/s max velocity, 20000 mm/s² max accel (input shaper tuned)
-- **Z speed**: 50 mm/s max, 300 mm/s² accel (conservative for TR8x4 leadscrews)
-- **Homing speeds**: 80 mm/s (sensorless requires speed > rotation_distance)
-- **AFC long moves**: 150 mm/s, 250 mm/s² (fast filament changes)
-- **AFC short moves**: 50 mm/s, 300 mm/s² (precise toolhead loading)
+- **Motion limits** — `[printer]` in `printer.cfg`: `max_velocity` / `max_accel` (input shaper tuned),
+  `max_z_velocity` / `max_z_accel` (kept conservative for the TR8x4 leadscrews)
+- **Homing speed** — `homing_speed` on `[stepper_x]` / `[stepper_y]` in `printer.cfg`. Sensorless homing
+  with TMC autotune requires it to be numerically greater than `rotation_distance`.
+- **AFC moves** — `long_moves_*` (bowden travel) and `short_moves_*` (toolhead loading) in `AFC/AFC.cfg`
 
 ### Dimensions
-- **Build volume**: X: -1 to 300, Y: 0 to 310, Z: -2.5 to 290 (authoritative: `[stepper_*]` in `printer.cfg`)
+- **Build volume**: Voron Trident 300 — nominally a 300 × 300 mm bed. Actual travel is tuned around the
+  installed toolhead and gantry; see `position_min` / `position_max` on `[stepper_*]` in `printer.cfg`.
 - **Parking positions**:
   - AFC_PARK: Near rear-left for tool changes
   - `PRINT_END`: `Y = axis_maximum.y - 10` (rear), then `AFC_PARK` if defined, else
     `X = axis_maximum.x - 10`
-- **Beacon offset**: X=0, Y=25 (probe 25mm behind nozzle)
+- **Beacon offset** — `x_offset` / `y_offset` in `beacon.cfg`; the probe sits behind the nozzle in Y
 
 ### Temperature Limits
-- **Extruder**: 0-315°C (min extrude: 170°C)
-- **Bed**: 0-120°C
-- **Chamber**: Max 100°C tracked (via `nitehawk-36` temp sensor as proxy)
-  - Max *requested* chamber temp of 60°C enforced in `HEAT_SOAK` macro. The passive heating from bed and hotend may raise actual chamber temp higher, depending on the weather.
+- **Extruder / bed ranges** — `min_temp` / `max_temp` in `nitehawk-36.cfg` (`[extruder]`, hotend-dependent)
+  and `printer.cfg` (`[heater_bed]`). `min_extrude_temp` gates extrusion.
+- **Chamber**: tracked via the `nitehawk-36` sensor as a proxy — there is no dedicated chamber heater.
+  The max *requested* target is `variable_max_chamber_target` in `HEAT_SOAK`; passive heating from bed and
+  hotend may drive the actual chamber temperature higher depending on ambient conditions.
 
 ## Troubleshooting Aids
 
