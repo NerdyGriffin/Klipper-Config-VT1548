@@ -33,3 +33,6 @@ ShakeTune_results/*
 # Symlinks to external repos
 KAMP/*
 nerdygriffin-macros/*
+
+# AFC installer backups
+AFC.backup.*/
