@@ -37,6 +37,7 @@ AFC enables automatic tool changes with filament cutting and parking:
 - **AFC components**:
   - `AFC/AFC.cfg` - Main AFC configuration (speeds, LED states, macro ordering)
   - `AFC/AFC_Hardware.cfg` - Physical sensors and servo definitions
+  - `AFC/AFC_Toolchanger.cfg` - Standalone toolchanger unit; see AFC gotchas below
   - `AFC/macros/` - Tool change operations (Cut, Brush, Park, Poop, Kick)
 - **Integration points**:
   - `PRINT_START` calls `AFC_PARK` and `AFC_BRUSH` for pre-print prep
@@ -96,6 +97,13 @@ RESTORE_GCODE_STATE NAME=my_operation MOVE=1
      `diff -u ~/AFC-Klipper-Add-On/config/AFC.cfg AFC/AFC.cfg`. Intentional local divergences:
      absolute `VarFile`, `enable_runout_in_bypass: True`, `resume_speed: 1000` /
      `resume_z_speed: 150`, `poop: False` / `kick: False`.
+   - **`install_afc.sh` is destructive** — a remove+reinstall resets `pin_tool_start` to `buffer`
+     and wipes `tool_stn`/`tool_stn_unload` in `AFC_Hardware.cfg` (halting Klipper), replaces every
+     tuned value in `AFC_Macro_Vars.cfg` with `-99,-99` placeholders, reverts `AFC.cfg`, un-`.bak`s
+     `AFC_Turtle_1.cfg`, relocates `[include AFC/*.cfg]` in `printer.cfg`, and resets
+     `~/AFC-Klipper-Add-On` (dropping any local patch, bypassing Moonraker's dirty-repo guard).
+     Back up, then restore from git — but *merge* `AFC_Macro_Vars.cfg` rather than reverting it,
+     since refreshed macros reference newly added variables. See `39fcaec`.
 4. **Moonraker updates**: When adding git repos, add `[update_manager name]` section to `moonraker.conf`
 
 ### Delayed G-code Pattern
@@ -129,7 +137,9 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 - **Hotend fan**: Has tachometer feedback (`tachometer_pin: nhk:gpio16`)
 
 ### Filament Sensors
-- **Switch sensor** (`switch_sensor`, `^PG12`): Upstream filament presence; pauses on runout
+- **Switch sensor** (`switch_sensor`, `^PG12`): Upstream filament presence. Announces via `M117`
+  and guards `RESUME` (`variable_runout_sensor` in `_CLIENT_VARIABLE`); does **not** pause — it
+  sits upstream of the bowden, so pausing is the toolhead sensor's job (`92f233b`)
   - Renamed from `bypass` in `44331f0`. **Never name a sensor `bypass`** — AFC matches that name
     literally (`lookup_object('filament_switch_sensor bypass')`) and binds it as its bypass flag,
     which breaks `UNLOAD_FILAMENT` after a runout. See AFC gotchas below.
@@ -249,12 +259,23 @@ Check what is actually registered:
 **AFC logs to its own file** — `~/printer_data/logs/AFC.log`, not `klippy.log`. Check it first;
 several AFC failure paths log there and return silently to the console.
 
-**No lanes are currently configured** (BoxTurtle uninstalled — `AFC/AFC_Turtle_1.cfg.bak`), so
-`printer.AFC.lanes` and `.maps` are empty. Two consequences:
-- KlipperScreen sends `M104 T0 S<temp>`; AFC resolves `T0` through lane maps only, so setting a
-  temperature from its UI fails with `extruder not configured for T0`. No config fix exists —
-  AFC should fall back to the toolhead extruder when no lane matches.
-- `UNLOAD_FILAMENT` silently no-ops (no message, no motion) unless bypass is active.
+**A standalone toolchanger lane supplies `T0`** (`AFC/AFC_Toolchanger.cfg`, added in `a2b7f52`).
+No BoxTurtle is built (`AFC/AFC_Turtle_1.cfg.bak`), so there are no real lanes — and AFC resolves
+the `T` index of its replacement `M104`/`M109` through lane maps *only*. Without a `T0` mapping,
+KlipperScreen's `M104 T0 S<temp>` fails with `extruder not configured for T0` and silently does
+nothing (the error goes to `AFC.log`, not the console).
+
+`toolchanger_unit` on `[AFC_extruder extruder]` makes AFC build a plain `AFCLane` for the toolhead
+— no stepper, no motor pins, no TMC section, since `extruder.ExtruderStepper()` is created only by
+the `AFCExtruderStepper` subclass. `map: T0` claims the index explicitly.
+- `printer.AFC` reports `lanes: ['extruder']`, `maps: ['T0']`; PREP logs "Toolchanger Ready".
+- The lane stays `tool_loaded: false`, so `AFC.current` is `None` and the virtual bypass keeps
+  working — `UNLOAD_FILAMENT` still reaches `_AFC_RENAMED_UNLOAD_FILAMENT_`, i.e. the real macro.
+  `SET_LANE_LOADED` would flip that, handing unloads to AFC and disabling the bypass.
+- `T0` is now a live `CHANGE_TOOL` command. A slicer emitting `T0` would attempt a tool change
+  against this lane — untested.
+- Do not "fix" this by patching `cmd_AFC_M104` in `~/AFC-Klipper-Add-On`: the patch dirties the
+  repo (blocking Moonraker updates) and does not survive `install_afc.sh`.
 
 ## Deprecated Files
 
