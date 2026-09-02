@@ -102,13 +102,23 @@ RESTORE_GCODE_STATE NAME=my_operation MOVE=1
      `diff -u ~/AFC-Klipper-Add-On/config/AFC.cfg AFC/AFC.cfg`. Intentional local divergences:
      absolute `VarFile`, `enable_runout_in_bypass: True`, `resume_speed: 1000` /
      `resume_z_speed: 150`, `poop: False` / `kick: False`.
-   - **`install_afc.sh` is destructive** — a remove+reinstall resets `pin_tool_start` to `buffer`
-     and wipes `tool_stn`/`tool_stn_unload` in `AFC_Hardware.cfg` (halting Klipper), replaces every
-     tuned value in `AFC_Macro_Vars.cfg` with `-99,-99` placeholders, reverts `AFC.cfg`, un-`.bak`s
-     `AFC_Turtle_1.cfg`, relocates `[include AFC/*.cfg]` in `printer.cfg`, and resets
-     `~/AFC-Klipper-Add-On` (dropping any local patch, bypassing Moonraker's dirty-repo guard).
-     Back up, then restore from git — but *merge* `AFC_Macro_Vars.cfg` rather than reverting it,
-     since refreshed macros reference newly added variables. See `39fcaec`.
+   - **`install-afc.sh` replaces the config rather than updating it.** Its `remove` step renames the
+     whole `AFC/` directory to `AFC.backup.<YYYYMMDDHHMMSS>` (`mv AFC AFC.backup."$backup_date"` in
+     `include/utils.sh`) and strips `[include AFC/*.cfg]` from `printer.cfg`. The installer then
+     regenerates `AFC/` from the wizard's answers and re-inserts the include immediately *above* the
+     `SAVE_CONFIG` marker (appending to EOF only if that marker is absent).
+     Nothing is destroyed — the old config is intact in the backup directory — but anything not
+     re-entered in the wizard returns as a template default: stock `tool_stn` / `tool_stn_unload`,
+     `-99,-99` placeholders throughout `AFC_Macro_Vars.cfg`, and a freshly generated
+     `AFC_Turtle_1.cfg` (the previous `.bak` having moved into the backup directory with everything
+     else). `pin_tool_start` comes back as `buffer` unless the toolhead sensor is set up in the
+     wizard — which halts Klipper with `[AFC_buffer None] is not found` if left unconfigured.
+     Recovery: restore from git, but *merge* `AFC_Macro_Vars.cfg` rather than reverting it, since the
+     refreshed macros reference newly added variables. See `39fcaec`.
+   - The installer **aborts if `~/AFC-Klipper-Add-On` has uncommitted changes**
+     (`check_for_uncommitted_changes` in `include/utils.sh`) and prints the reset commands to run.
+     Local patches to the add-on must therefore be discarded by hand before it will run — one more
+     reason not to carry them.
 4. **Moonraker updates**: When adding git repos, add `[update_manager name]` section to `moonraker.conf`
 
 ### Delayed G-code Pattern
