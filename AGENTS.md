@@ -96,7 +96,12 @@ RESTORE_GCODE_STATE NAME=my_operation MOVE=1
    dedicated overrides file included *last* in `printer.cfg` (after every `nerdygriffin-macros/*.cfg`).
    It is organized by upstream filename.
    - Example: `[pwm_cycle_time beeper]` re-declares `pin: PD15` over `nerdygriffin-macros/beeper.cfg`
-   - `[gcode_macro _CLIENT_VARIABLE]` is the exception — overridden in `printer.cfg` directly
+   - `[gcode_macro _CLIENT_VARIABLE]` is the exception — it is declared in *both*
+     `nerdygriffin-macros/client.cfg` and `printer.cfg`, and Klipper merges them key by key with the
+     later (local) file winning. Only the keys `printer.cfg` actually sets are overridden;
+     `user_pause_macro` / `user_resume_macro` / `user_cancel_macro` / `park_at_cancel` come from the
+     shared file and are **live** despite appearing commented out locally. Query
+     `printer['gcode_macro _CLIENT_VARIABLE']` for the merged truth rather than reading either file.
 3. **AFC customization**: Edit `AFC/AFC.cfg` locally; it's not symlinked
    - It is a copy of the installer template and drifts as upstream adds options. Resync with
      `diff -u ~/AFC-Klipper-Add-On/config/AFC.cfg AFC/AFC.cfg`. Intentional local divergences:
