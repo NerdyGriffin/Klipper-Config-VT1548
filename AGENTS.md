@@ -162,9 +162,9 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 - **Hotend fan**: Has tachometer feedback (`tachometer_pin: nhk:gpio16`)
 
 ### Filament Sensors
-- **Switch sensor** (`switch_sensor`, `^PG12`): Upstream filament presence. Announces via `M117`
-  and guards `RESUME` (`variable_runout_sensor` in `_CLIENT_VARIABLE`); does **not** pause — it
-  sits upstream of the bowden, so pausing is the toolhead sensor's job (`92f233b`)
+- **Switch sensor** (`switch_sensor`, `^PG12`): Upstream filament presence. Announces via `M117`;
+  does **not** pause and no longer guards `RESUME` — it sits upstream of the bowden, so both jobs
+  belong to the toolhead sensor (`92f233b`)
   - Renamed from `bypass` in `44331f0`. **Never name a sensor `bypass`** — AFC matches that name
     literally (`lookup_object('filament_switch_sensor bypass')`) and binds it as its bypass flag,
     which breaks `UNLOAD_FILAMENT` after a runout. See AFC gotchas below.
@@ -172,7 +172,15 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
   - `detection_length` is tuned well above the BTT default (2.88) to avoid flow-dropoff false positives; see `printer.cfg`
   - Enabled during print (`PRINT_START`), disabled after (`PRINT_END`)
 - **Toolhead runout** (`nhk:gpio3`, AFC-owned `pin_tool_start`): pauses in manual/bypass mode via
-  `enable_runout_in_bypass: True` in `AFC/AFC.cfg`
+  `enable_runout_in_bypass: True` in `AFC/AFC.cfg`, and guards `RESUME`
+  (`variable_runout_sensor` in `_CLIENT_VARIABLE`)
+  - AFC exposes the pin as a real `[filament_switch_sensor extruder_tool_start]` built at runtime by
+    `add_filament_switch()` — `<AFC_extruder section name>_tool_start`. The object keeps that name
+    only while `enable_sensors_in_gui: True`; with it False AFC re-registers it as
+    `_filament_switch_sensor …`, and `RESUME` would then error on the missing key every time.
+  - Its `enabled` flag is AFC-managed (initialized from `enable_tool_runout`, togglable from the GUI
+    or `SET_FILAMENT_SENSOR`); mainsail treats a disabled sensor as "resume allowed".
+  - `AFC_RESUME` ends by running `_AFC_RENAMED_RESUME_`, so the mainsail guard still runs.
 - **Virtual bypass** (AFC-created GUI toggle): means "filament is fed manually, bypassing the unit".
   It is a manual switch, not a sensor, so it survives a runout — flip it on when hand-feeding.
   State persists in `AFC/AFC.var.unit` and is restored by PREP on every restart.
