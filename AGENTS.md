@@ -171,6 +171,11 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 - **Motion sensor** (`encoder_sensor`, `^PG13`): BTT SFS v2.0, detects flow issues/clogs
   - `detection_length` is tuned well above the BTT default (2.88) to avoid flow-dropoff false positives; see `printer.cfg`
   - Enabled during print (`PRINT_START`), disabled after (`PRINT_END`)
+  - Its `runout_gcode` pauses **only if `switch_sensor` still sees filament** (a jam/clog). When the
+    switch is clear the encoder fired because the spool tail left the unit, so it just posts a
+    message and lets the tail run down to the toolhead sensor, which does the pause. This works
+    because the SFS microswitch is actuated by the encoder wheel's arm — both sensors see the tail
+    at the same instant, so by the time the encoder's `detection_length` elapses the switch is clear.
 - **Toolhead runout** (`nhk:gpio3`, AFC-owned `pin_tool_start`): pauses in manual/bypass mode via
   `enable_runout_in_bypass: True` in `AFC/AFC.cfg`, and guards `RESUME`
   (`variable_runout_sensor` in `_CLIENT_VARIABLE`)
