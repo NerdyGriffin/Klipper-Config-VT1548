@@ -13,7 +13,8 @@ holds its own hardware and overrides. **Feature parity comes from the shared
 Each host keeps its own clone of `klipper-nerdygriffin-macros`. After changing a shared macro:
 1. Commit and **push** in `klipper-nerdygriffin-macros`.
 2. Pull every host's clone to the same commit — `klipper-nerdygriffin-macros/dev/sync_macros_repo.sh`
-   (run from the V0 host; it pulls the local clone and the VT-1548 clone over SSH alias `vt-1548`).
+   (run from either host; it pulls the local clone and the peer's clone over SSH. The peer comes
+   from the git-ignored `dev/.env`, see `dev/.env.example`).
 3. `FIRMWARE_RESTART` each printer.
 
 When editing from the other host over Remote-SSH/NFS the counterpart config is mounted (this config
