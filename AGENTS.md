@@ -1,4 +1,4 @@
-# AI Agent Instructions for Klipper-Config-VT-1548
+# AI Agent Instructions for Klipper-Config-VT1548
 
 This is a **Klipper 3D printer configuration** for a Voron Trident 300mm (VT.1548) with advanced multi-material capabilities via AFC (Automated Filament Control from https://github.com/ArmoredTurtle/AFC-Klipper-Add-On).
 
@@ -25,20 +25,33 @@ at `/mnt/vt-1548/...`, the V0 config at `/mnt/v0-3048/...`); still edit shared m
 
 ### Config Organization Pattern
 - **Main entry point**: `printer.cfg` - includes all subsystem configs and hardware definitions
-- **Symlinked plugin architecture**: External macro libraries linked via `ln -sf ~/source ~/printer_data/config/link-name`
+- **Symlinked plugin architecture**: External macro libraries linked via `ln -sfv ~/source ~/printer_data/config/link-name`
   - `nerdygriffin-macros/` → Shared hardware-agnostic macros (git-managed plugin)
   - `KAMP/` → Klipper Adaptive Meshing & Purging (read-only symlink)
   - `AFC/` → Multi-material system configs (local, AFC-specific)
 - **Hardware-specific configs**: `nitehawk-36.cfg` (toolhead), `beacon.cfg` (probe), stepper configs in `printer.cfg`
 - **Deprecated folder**: Old configs kept for reference; never include these
+- **Includes & symlinks** (all from `printer.cfg`):
+  - Symlinks: `mainsail.cfg` → `~/mainsail-config/client.cfg`, `moonraker_obico_macros.cfg` → `~/moonraker-obico/...`,
+    `timelapse.cfg` → `~/moonraker-timelapse/...`, `AFC_menu.conf` → `~/AFC-Klipper-Screen-Add-On/...`
+    (KlipperScreen menu; not a Klipper include)
+  - Local: `autotune.cfg` (TMC autotune), `TEST_SPEED.cfg`, `KAMP_Settings.cfg`, `AFC/*.cfg`, `nerdygriffin-macros.cfg`
+  - Shared (`nerdygriffin-macros/`): `homing.cfg`, `idle_timeout.cfg`, `gcode_features.cfg` (`[pause_resume]`, `[force_move]`,
+    `[exclude_object]`, `[firmware_retraction]`, `[gcode_arcs]`, `[respond]`), `positioning_macros.cfg`, `squiggly_purge.cfg`,
+    `shaketune.cfg`, `filament_management.cfg`, `print_macros.cfg`, `client.cfg`, `status_macros.cfg`, and the rest listed there
+  - **Not live**: `nevermore.cfg` is tracked but has no `[include]` in `printer.cfg` and no `[update_manager]` entry in
+    `moonraker.conf` — it is staged for a future Nevermore controller. The live Nevermore fan is `[heater_fan filter_fan]`
+    in `printer.cfg`.
 
 ### Multi-Material System (AFC)
 AFC enables automatic tool changes with filament cutting and parking:
 - **Hardware detection pattern**: Macros check if AFC commands exist before calling (e.g., `{% if printer['gcode_macro AFC_BRUSH'] is defined %}`)
 - **AFC components**:
   - `AFC/AFC.cfg` - Main AFC configuration (speeds, LED states, macro ordering)
-  - `AFC/AFC_Hardware.cfg` - Physical sensors and servo definitions
-  - `AFC/AFC_Toolchanger.cfg` - Standalone toolchanger unit; see AFC gotchas below
+  - `AFC/AFC_Hardware.cfg` - Physical sensors and servo definitions; `toolchanger_unit: Tools` on `[AFC_extruder extruder]`
+  - `AFC/AFC_Toolchanger.cfg` - Standalone toolchanger unit `[AFC_Toolchanger Tools]`; see AFC gotchas below
+  - `AFC/AFC_Macro_Vars.cfg` - Brush / park / cut positions (`_AFC_BRUSH_VARS`, `_AFC_PARK_VARS`, `_AFC_CUT_TIP_VARS`, ...)
+  - `AFC/mcu/AFC_Lite.cfg` - `[board_pins Turtle_1]` aliases for the not-yet-built BoxTurtle
   - `AFC/macros/` - Tool change operations (Cut, Brush, Park, Poop, Kick)
 - **Integration points**:
   - `PRINT_START` calls `AFC_PARK` and `AFC_BRUSH` for pre-print prep
@@ -53,15 +66,22 @@ AFC enables automatic tool changes with filament cutting and parking:
 
 ### Probing & Homing Strategy
 - **Beacon probe** (`beacon.cfg`): Eddy-current probe with contact/proximity dual-mode
-  - Contact mode: Used for initial Z calibration (`_CONTACT_ACTIVATE` cools the extruder to 150°C)
-  - Proximity mode: Faster subsequent homing after initial contact calibration
-- **Sensorless XY homing** (`nerdygriffin-macros/homing.cfg`): TMC stallguard-based with reduced motor current during homing
+  - Contact mode: Used for initial Z calibration (`_CONTACT_ACTIVATE` cools the extruder to `PROBE_TEMP`, and when Z is
+    already homed first runs `AFC_BRUSH` / `AFC_PARK` if defined)
+  - Proximity mode: Faster subsequent homing once homed (`home_method_when_homed`). The plain `G28` at the top of
+    `PRINT_START` uses it when already homed, but `PRINT_START` then runs `G28 Z METHOD=CONTACT CALIBRATE=1` twice and
+    `CALIBRATE=0` once (`nerdygriffin-macros/print_macros.cfg`), so contact calibration is redone every print.
+- **Sensorless XY homing** (`nerdygriffin-macros/homing.cfg`): TMC stallguard-based with reduced motor current during homing.
+  Under Beacon it is wired in via `home_gcode_pre_x` / `home_gcode_post_x` (and `_y`, `_z`) in `beacon.cfg`, which call
+  `_HOME_PRE_AXIS` / `_HOME_POST_AXIS AXIS=...`; `[include beacon.cfg]` must therefore come after `homing.cfg` (`printer.cfg` comment)
 - **No `[homing_override]` and no local homing file**: `[beacon]` supplies the equivalent
   (`home_xy_position`, `home_method`, `home_method_when_homed`), and `beacon.cfg` notes the section
   "should be removed... it is handled by the `[beacon]` section". V0-3048 *does* carry a local
   `homing_override.cfg` with its own `_HOME_X/Y/Z` because it homes Z to a switch endstop — do not copy
   that pattern here.
-- **Z-tilt leveling**: 3-point bed leveling (front-left, rear-center, front-right) before every mesh
+- **Z-tilt leveling**: 3-point bed leveling (front-left, rear-center, front-right) before every mesh. Local wrappers:
+  `[gcode_macro Z_TILT_ADJUST]` in `printer.cfg` (adds `STATUS_CALIBRATING_Z` and a trailing `G28 Z`) and
+  `[gcode_macro BED_MESH_CALIBRATE]` in `beacon.cfg` (adds `STATUS_MESHING`)
 - **Thermal compensation**: See `_BEACON_VARIABLE` macro and `beacon.cfg` for authoritative thermal Z offset values (added during print, removed after)
 
 ## Critical Patterns & Conventions
@@ -88,8 +108,9 @@ RESTORE_GCODE_STATE NAME=my_operation MOVE=1
 - **Beacon contact probing limit**: `_CONTACT_ACTIVATE` cools the extruder to 150°C before contact
   probing (`PROBE_TEMP` in `beacon.cfg`). Beacon's own ceiling is `contact_max_hotend_temperature`
   (default 180°C), commented out in `beacon.cfg` — so 150°C is the effective limit.
-- **Standby temperature**: `PRINT_START` sets extruder to 150°C during bed heating to minimize beacon thermal drift
-- **Heat soak pattern**: `HEAT_SOAK DURATION=15 CHAMBER=60` waits for chamber temp + stabilization time
+- **Standby temperature**: `PRINT_START` sets the extruder to `variable_standby_extruder` during bed heating to minimize beacon thermal drift
+- **Heat soak pattern**: `PRINT_START` runs `HEAT_SOAK DURATION=15 CHAMBER={target_chamber}` — `target_chamber` is computed from the
+  requested/bed temps and capped by `variable_max_chamber_target` — waiting for chamber temp + stabilization time
 
 ### File Modification Rules
 1. **Never edit symlinked directories**: `nerdygriffin-macros/`, `KAMP/` are git-managed externally
@@ -107,7 +128,7 @@ RESTORE_GCODE_STATE NAME=my_operation MOVE=1
    - It is a copy of the installer template and drifts as upstream adds options. Resync with
      `diff -u ~/AFC-Klipper-Add-On/config/AFC.cfg AFC/AFC.cfg`. Intentional local divergences:
      absolute `VarFile`, `enable_runout_in_bypass: True`, `resume_speed: 1000` /
-     `resume_z_speed: 150`, `poop: False` / `kick: False`.
+     `resume_z_speed: 150`, `poop: False` / `kick: False`, `default_material_temps` (changed to match the slicer).
    - **`install-afc.sh` replaces the config rather than updating it.** Its `remove` step renames the
      whole `AFC/` directory to `AFC.backup.<YYYYMMDDHHMMSS>` (`mv AFC AFC.backup."$backup_date"` in
      `include/utils.sh`) and strips `[include AFC/*.cfg]` from `printer.cfg`. The installer then
@@ -126,6 +147,7 @@ RESTORE_GCODE_STATE NAME=my_operation MOVE=1
      Local patches to the add-on must therefore be discarded by hand before it will run — one more
      reason not to carry them.
 4. **Moonraker updates**: When adding git repos, add `[update_manager name]` section to `moonraker.conf`
+   (`moonraker.conf*` is gitignored, so these edits are untracked and local to the host)
 
 ### Delayed G-code Pattern
 ```gcode
@@ -156,23 +178,31 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 - **Fan issue**: FAN3 (PD13) burned out 2023-10-27; exhaust moved to FAN0 (PA8)
 
 ### LDO Nitehawk-36 Toolboard (Extruder MCU)
-- **RP2040-based** CAN toolboard, connected via USB serial
-- **BMG-style extruder**: 44:8, 25:17 gear ratio (see `nitehawk-36.cfg` for current `rotation_distance`)
-- **Pressure advance**: See the authoritative value in `printer.cfg` (`[extruder]` section). Avoid duplicating values in docs.
+- **RP2040-based** USB toolboard (`serial: /dev/serial/by-id/usb-Klipper_rp2040_...` in `nitehawk-36.cfg`)
+- **Jabberwocky extruder**: 44:8, 25:17 gear ratio (see `nitehawk-36.cfg` for current `rotation_distance`)
+- **Hotend / nozzle**: Phaetus Conch; nozzle per `nozzle_diameter` in `nitehawk-36.cfg`
+- **Pressure advance**: See the authoritative value in `nitehawk-36.cfg` (`[extruder]` section). Avoid duplicating values in docs.
 - **Toolhead sensors**: Start sensor (`gpio3`), end sensor (`gpio13`) for AFC
 - **Hotend fan**: Has tachometer feedback (`tachometer_pin: nhk:gpio16`)
 
 ### Filament Sensors
 - **Switch sensor** (`switch_sensor`, `^PG12`): Upstream filament presence. Announces via `M117`;
   does **not** pause and no longer guards `RESUME` — it sits upstream of the bowden, so both jobs
-  belong to the toolhead sensor (`92f233b`)
+  belong to the toolhead sensor (`92f233b`). Its `runout_gcode` carries a commented-out `_PAUSE_IF_PRINTING`
+  hook plus `RESET_STATUS`; if pausing is ever re-enabled use that hook, **never a bare `PAUSE`** (see encoder below)
   - Renamed from `bypass` in `44331f0`. **Never name a sensor `bypass`** — AFC matches that name
     literally (`lookup_object('filament_switch_sensor bypass')`) and binds it as its bypass flag,
     which breaks `UNLOAD_FILAMENT` after a runout. See AFC gotchas below.
 - **Motion sensor** (`encoder_sensor`, `^PG13`): BTT SFS v2.0, detects flow issues/clogs
   - `detection_length` is tuned well above the BTT default (2.88) to avoid flow-dropoff false positives; see `printer.cfg`
-  - Enabled during print (`PRINT_START`), disabled after (`PRINT_END`)
-  - Its `runout_gcode` pauses **only if `switch_sensor` still sees filament** (a jam/clog). When the
+  - Enabled in `PRINT_START`; disabled at startup (`DISABLE_ENCODER_SENSOR` delayed_gcode, `initial_duration: 1`),
+    on pause (`_AFTER_PAUSE`), on idle timeout (`nerdygriffin-macros/idle_timeout.cfg`), and in `PRINT_END`
+  - Its `runout_gcode` pauses via `_PAUSE_IF_PRINTING` (`nerdygriffin-macros/filament_management.cfg`; requires
+    `[include nerdygriffin-macros/filament_management.cfg]` and macros ≥ `873c048`) **only if `switch_sensor` still
+    sees filament** (a jam/clog). A runout while idle no longer pauses: stock `PAUSE` sets `pause_resume.is_paused`
+    even with no job running and `SDCARD_PRINT_FILE` never clears it, which let `NOZZLE_STANDBY_COOLDOWN` cool the
+    hotend mid-print on V0.3048 (2026-10-07). `PRINT_START` also runs `CLEAR_PAUSE` as a second line of defence.
+    **Never put a bare `PAUSE` in a `runout_gcode`.** When the
     switch is clear the encoder fired because the spool tail left the unit, so it just posts a
     message and lets the tail run down to the toolhead sensor, which does the pause. This works
     because the SFS microswitch is actuated by the encoder wheel's arm — both sensors see the tail
@@ -202,7 +232,7 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 
 ### Testing Macro Changes
 ```bash
-# Restart Klipper after config edits
+# Restart Klipper after config edits (use http://VT-1548:7125 when working from the V0 host)
 curl -s -X POST "http://localhost:7125/printer/gcode/script?script=FIRMWARE_RESTART"
 
 # Check for errors
@@ -224,15 +254,16 @@ curl -s -X POST "http://localhost:7125/printer/gcode/script?script=MY_MACRO"
 ### Tuning Operations (in order)
 1. **Sensorless homing**: `TEST_SENSORLESS_HOME_X TEST_SGTHRS=255` (decrease until reliable)
 2. **PID tuning**: `AUTO_PID_CALIBRATE HEATER=extruder TARGET=260`
-3. **Input shaper**: `TEST_RESONANCES AXIS=X`, analyze with `scripts/graph_accelerometer.py`
-4. **Pressure advance**: `TUNING_TOWER COMMAND=SET_PRESSURE_ADVANCE PARAMETER=ADVANCE START=0 FACTOR=.005` (check `printer.cfg` after tuning for the latest value)
-5. **Beacon calibration**: `BEACON_CALIBRATE` (automatic on first home with `home_autocalibrate: unhomed`)
+3. **Input shaper**: Klippain ShakeTune — `SHAKETUNE_COLD` / `SHAKETUNE_HOT` / `SHAKETUNE_BELTS_RESPONSES` /
+   `SHAKETUNE_BELT_TENSION` (`nerdygriffin-macros/shaketune.cfg`); `accel_chip: beacon` in `[resonance_tester]` (`printer.cfg`)
+4. **Pressure advance**: `TUNING_TOWER COMMAND=SET_PRESSURE_ADVANCE PARAMETER=ADVANCE START=0 FACTOR=.005` (check `nitehawk-36.cfg` after tuning for the latest value)
+5. **Beacon calibration**: `BEACON_CALIBRATE` (automatic on first home with `home_autocalibrate: unhomed`, and every `PRINT_START`)
 
 ### Moonraker Update Management
 When installing new Klipper extensions:
 1. Clone to `~/extension-name`
-2. Create symlink if needed: `ln -sf ~/extension-name/macros ~/printer_data/config/extension-name`
-3. Add to `moonraker.conf`:
+2. Create symlink if needed: `ln -sfv ~/extension-name/macros ~/printer_data/config/extension-name`
+3. Add to `moonraker.conf` (gitignored — untracked, local to the host):
 ```ini
 [update_manager extension-name]
 type: git_repo
@@ -258,7 +289,7 @@ quoted in documentation. Only nominal hardware specs are stated outright.
 - **Build volume**: Voron Trident 300 — nominally a 300 × 300 mm bed. Actual travel is tuned around the
   installed toolhead and gantry; see `position_min` / `position_max` on `[stepper_*]` in `printer.cfg`.
 - **Parking positions**:
-  - AFC_PARK: Near rear-left for tool changes
+  - `AFC_PARK`: `variable_park_loc_xy` in `_AFC_PARK_VARS` (`AFC/AFC_Macro_Vars.cfg`), near rear-left
   - `PRINT_END`: `Y = axis_maximum.y - 10` (rear), then `AFC_PARK` if defined, else
     `X = axis_maximum.x - 10`
 - **Beacon offset** — `x_offset` / `y_offset` in `beacon.cfg`; the probe sits behind the nozzle in Y
@@ -278,14 +309,16 @@ quoted in documentation. Only nominal hardware specs are stated outright.
 - Check for typos in `[include ...]` statements in `printer.cfg`
 
 ### Probing failures
-- Ensure extruder is cool (`_CONTACT_ACTIVATE` enforces 150°C; Beacon's own ceiling is 180°C)
+- Ensure extruder is cool (`_CONTACT_ACTIVATE` enforces `PROBE_TEMP` in `beacon.cfg`; Beacon's own ceiling is `contact_max_hotend_temperature`)
 - Check `beacon.cfg` home_method: `contact` for first home, `proximity` after calibration
 - Verify Z-tilt clears before mesh: `Z_TILT_ADJUST` must complete before `BED_MESH_CALIBRATE`
 
 ### AFC tool change failures
-- Verify sensors: `QUERY_FILAMENT_SENSOR SENSOR=encoder_sensor`
+- Verify AFC sensors: `QUERY_FILAMENT_SENSOR SENSOR=extruder_tool_start` / `SENSOR=extruder_tool_end`
+  (`pin_tool_start` / `pin_tool_end` in `AFC/AFC_Hardware.cfg`). `encoder_sensor` is the shared flow sensor, not AFC-owned
 - Check AFC calibration: See `AFC/AFC_Hardware.cfg` for authoritative `tool_stn` and `tool_stn_unload` values
-- Review AFC LED states on hub to diagnose (defined in `AFC/AFC.cfg` led_* variables)
+- No AFC LEDs exist until a BoxTurtle is built — there is no `[AFC_led]` section anywhere, so `led_name: AFC_Indicator`
+  in `AFC/AFC.cfg` is currently dangling
 
 ### AFC renames stock commands at PREP time
 AFC does not just add commands — it re-registers existing ones at runtime, so `HELP` and your
@@ -330,9 +363,10 @@ the `AFCExtruderStepper` subclass. `map: T0` claims the index explicitly.
 ## Version Control Notes
 
 - **Active branch**: `main` (Owner: NerdyGriffin, Repo: Klipper-Config-VT1548)
-- **Backup strategy**: `backup/` directory stores historical config snapshots
+- **Backup strategy**: `backup/` directory stores historical config snapshots (gitignored, local only)
 - **Auto-generated sections**: Everything below `#*# <--- SAVE_CONFIG --->` in `printer.cfg` is auto-updated by Klipper (PID, input shaper, etc.)
-- **Don't commit**: `*.bak`, `*.var`, `ShakeTune_results/`, `.moonraker.conf.bkp`
+- **Don't commit** new `*.bak` / `*.var` files, `ShakeTune_results/`, `moonraker.conf*`; the two tracked `.bak` files
+  (`AFC/AFC_Turtle_1.cfg.bak`, `KlipperScreen.conf.bak`) are deliberate exceptions (`.gitignore` has `*.bak`; only `AFC/AFC.var.unit` is ignored, not `*.var`)
 
 ## Ease of use
 - If I repeated request actions that contradict these instructions, propose ways to improve these instructions.
