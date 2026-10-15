@@ -39,9 +39,11 @@ at `/mnt/vt-1548/...`, the V0 config at `/mnt/v0-3048/...`); still edit shared m
   - Shared (`nerdygriffin-macros/`): `homing.cfg`, `idle_timeout.cfg`, `gcode_features.cfg` (`[pause_resume]`, `[force_move]`,
     `[exclude_object]`, `[firmware_retraction]`, `[gcode_arcs]`, `[respond]`), `positioning_macros.cfg`, `squiggly_purge.cfg`,
     `shaketune.cfg`, `filament_management.cfg`, `print_macros.cfg`, `client.cfg`, `status_macros.cfg`, and the rest listed there
-  - **Not live**: `nevermore.cfg` is tracked but has no `[include]` in `printer.cfg` and no `[update_manager]` entry in
-    `moonraker.conf` — it is staged for a future Nevermore controller. The live Nevermore fan is `[heater_fan filter_fan]`
-    in `printer.cfg`.
+  - **Nevermore**: `nevermore.cfg` holds the `[nevermore]` StealthMax controller (BLE, `~/nevermore-controller`,
+    `[update_manager nevermore]` in `moonraker.conf`) and is included from `printer.cfg`. The controller owns its
+    fan (print mode, VOC policy, cooldown); the vent servo is driven by the shared `nerdygriffin-macros/nevermore.cfg`
+    (`NEVERMORE_VENT_AUTO`, overrides in `_NEVERMORE_VARS`). `[heater_fan filter_fan]` in `printer.cfg` is the older
+    in-chamber filter fan.
 
 ### Multi-Material System (AFC)
 AFC enables automatic tool changes with filament cutting and parking:
