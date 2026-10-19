@@ -17,9 +17,12 @@ Each host keeps its own clone of `klipper-nerdygriffin-macros`. After changing a
    from the git-ignored `dev/.env`, see `dev/.env.example`).
 3. `FIRMWARE_RESTART` each printer.
 
-When editing from the other host over Remote-SSH/NFS the counterpart config is mounted (this config
-at `/mnt/vt-1548/...`, the V0 config at `/mnt/v0-3048/...`); still edit shared macros in
-`klipper-nerdygriffin-macros`, never in a mounted config's `nerdygriffin-macros/` symlink.
+Each host also keeps a **read-only git clone** of the counterpart config for cross-referencing
+(the V0 config at `~/Klipper-Config-V03048` here; this config at `~/Klipper-Config-VT1548` on the
+V0), refreshed by `klipper-nerdygriffin-macros/dev/sync_peer_config.sh` and opened as a folder in
+the `.code-workspace`. It shows only pushed commits, so edit the V0's config on the V0 host and
+push; and still edit shared macros in `klipper-nerdygriffin-macros`, never in a clone's
+`nerdygriffin-macros/` symlink.
 
 ## Architecture Overview
 

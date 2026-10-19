@@ -1,7 +1,7 @@
 // Voron Trident 300 (VT-1548) Configuration Workspace
-// Folder order: Local config first (primary), shared macros second, remote V0-3048 third
+// Folder order: Local config first (primary), shared macros second, local clone of V0-3048 third
 // Local config: /home/pi/printer_data/config (this printer)
-// Remote config: /mnt/v0-3048/printer_data/config (NFS mount for cross-printer dev)
+// V0-3048 config: /home/pi/Klipper-Config-V03048 (local git clone for cross-referencing; git pull to refresh)
 {
   "folders": [
     {
@@ -18,7 +18,7 @@
     },
     {
       "name": "V0-3048: config",
-      "path": "/mnt/v0-3048/printer_data/config"
+      "path": "/home/pi/Klipper-Config-V03048"
     }
   ],
   "settings": {
