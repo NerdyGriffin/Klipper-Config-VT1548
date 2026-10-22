@@ -195,15 +195,18 @@ UPDATE_DELAYED_GCODE ID=my_delayed_action DURATION=10  # Run in 10 seconds
 - **Hotend fan**: Has tachometer feedback (`tachometer_pin: nhk:gpio16`)
 
 ### Filament Sensors
+The BTT SFS V2.0 pair (`switch_sensor`, `encoder_sensor`) is shared with V0.3048 in
+`nerdygriffin-macros/filament_sensors.cfg`; only their `switch_pin` lines are local, in `nerdygriffin-macros.cfg`.
+
 - **Switch sensor** (`switch_sensor`, `^PG12`): Upstream filament presence. Announces via `M117`;
   does **not** pause and no longer guards `RESUME` — it sits upstream of the bowden, so both jobs
-  belong to the toolhead sensor (`92f233b`). Its `runout_gcode` carries a commented-out `_PAUSE_IF_PRINTING`
-  hook plus `RESET_STATUS`; if pausing is ever re-enabled use that hook, **never a bare `PAUSE`** (see encoder below)
+  belong to the toolhead sensor (`92f233b`). Its `runout_gcode` is a message plus `RESET_STATUS`; if pausing is ever re-enabled use
+  `_PAUSE_IF_PRINTING`, **never a bare `PAUSE`** (see encoder below)
   - Renamed from `bypass` in `44331f0`. **Never name a sensor `bypass`** — AFC matches that name
     literally (`lookup_object('filament_switch_sensor bypass')`) and binds it as its bypass flag,
     which breaks `UNLOAD_FILAMENT` after a runout. See AFC gotchas below.
 - **Motion sensor** (`encoder_sensor`, `^PG13`): BTT SFS v2.0, detects flow issues/clogs
-  - `detection_length` is tuned well above the BTT default (2.88) to avoid flow-dropoff false positives; see `printer.cfg`
+  - `detection_length` is tuned well above the BTT default (2.88) to avoid flow-dropoff false positives; see `nerdygriffin-macros/filament_sensors.cfg`
   - Enabled in `PRINT_START`; disabled at startup (`DISABLE_ENCODER_SENSOR` delayed_gcode, `initial_duration: 1`),
     on pause (`_AFTER_PAUSE`), on idle timeout (`nerdygriffin-macros/idle_timeout.cfg`), and in `PRINT_END`
   - Its `runout_gcode` pauses via `_PAUSE_IF_PRINTING` (`nerdygriffin-macros/filament_management.cfg`; requires
