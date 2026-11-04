@@ -49,8 +49,8 @@ push; and still edit shared macros in `klipper-nerdygriffin-macros`, never in a 
     in-chamber filter fan.
   - **KlipperScreen**: intake VOC and vent state in the title bar come from `~/nevermore-klipperscreen-addon`
     (symlinked to `~/KlipperScreen/addons/nevermore.py`, loaded by KlipperScreen's add-on loader, which needs
-    `enable_addons: True` under `[main]` in `KlipperScreen.conf`). Installed per host with its `install.sh`;
-    it reads `nevermore.intake_gas` and `_NEVERMORE_VARS.vent_open` and stays idle on printers without `[nevermore]`.
+    `enable_addons: True` under `[main]` in `KlipperScreen.conf`). Installed with its `install.sh` on this host only;
+    V0-3048 has no Nevermore and does not have it. It reads `nevermore.intake_gas` and `_NEVERMORE_VARS.vent_open`.
 
 ### Multi-Material System (AFC)
 AFC enables automatic tool changes with filament cutting and parking:
