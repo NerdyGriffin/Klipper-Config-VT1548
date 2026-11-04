@@ -19,6 +19,9 @@
     {
       "name": "V0-3048: config",
       "path": "/home/pi/Klipper-Config-V03048"
+    },
+    {
+      "path": "../../nevermore-klipperscreen-addon"
     }
   ],
   "settings": {
