@@ -285,6 +285,22 @@ primary_branch: main
 managed_services: klipper
 ```
 
+### Flashing MCU Firmware
+After a Klipper update, reflash both MCUs with `mcuflash` (`~/mcuflash`, github.com/NerdyGriffin/mcuflash,
+`[update_manager mcuflash]` in `moonraker.conf`). It reads MCU names and serial paths from this config,
+so nothing is hard-coded:
+```bash
+mcuflash list              # mcu = btt-octopus, nhk = nitehawk-36; state and running firmware version
+mcuflash klipper all       # review build config, build, flash through Katapult
+mcuflash klipper nhk --dry-run
+```
+- Both boards run Katapult; `mcuflash katapult <mcu>` reinstalls it (Octopus over DFU, Nitehawk over BOOTSEL).
+- Build configs live in `~/mcuflash/boards/<board>/` and are shared with V0-3048; commit and push any
+  config change the tool saves there.
+- Flashing needs an interactive terminal (config menu, prompts). Do not run it for the user without
+  `--dry-run`.
+- The old `~/flash-k*.sh` scripts were retired on 2026-11-24 to `~/retired-flash-scripts-20261124/`.
+
 ## Key Configuration Values
 
 Every value below is tuned or calibrated and *will* drift. Read the cited config; do not trust numbers
