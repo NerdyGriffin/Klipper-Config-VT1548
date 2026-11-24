@@ -22,6 +22,10 @@
     },
     {
       "path": "../../nevermore-klipperscreen-addon"
+    },
+    {
+      "name": "mcuflash",
+      "path": "/home/pi/mcuflash"
     }
   ],
   "settings": {
