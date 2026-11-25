@@ -47,10 +47,11 @@ push; and still edit shared macros in `klipper-nerdygriffin-macros`, never in a 
     fan (print mode, VOC policy, cooldown); the vent servo is driven by the shared `nerdygriffin-macros/nevermore.cfg`
     (`NEVERMORE_VENT_AUTO`, overrides in `_NEVERMORE_VARS`). `[heater_fan filter_fan]` in `printer.cfg` is the older
     in-chamber filter fan.
-  - **KlipperScreen**: intake VOC and vent state in the title bar come from `~/nevermore-klipperscreen-addon`
+  - **KlipperScreen**: intake VOC and vent state in the title bar, and the read-only Nevermore row in the Fan
+    panel, come from `~/nevermore-klipperscreen-addon`
     (symlinked to `~/KlipperScreen/addons/nevermore.py`, loaded by KlipperScreen's add-on loader, which needs
     `enable_addons: True` under `[main]` in `KlipperScreen.conf`). Installed with its `install.sh` on this host only;
-    V0-3048 has no Nevermore and does not have it. It reads `nevermore.intake_gas` and `_NEVERMORE_VARS.vent_open`.
+    V0-3048 has no Nevermore and does not have it. It reads `nevermore.intake_gas` / `speed` / `rpm` and `_NEVERMORE_VARS.vent_open`.
 
 ### Multi-Material System (AFC)
 AFC enables automatic tool changes with filament cutting and parking:
